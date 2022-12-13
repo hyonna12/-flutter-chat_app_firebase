@@ -16,12 +16,23 @@ class ChatRoomPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: _buildAppBar(),
-      body: _buildListView(ref),
-      extendBody: ,
-
-      floatingActionButton: FloatingActionButton(
-        onPressed: _onPressedSendButton,
-        child: getInputWidget();
+      body: Container(
+        child: Column(
+          children: [
+            _buildListView(ref),
+            Expanded(
+              child: TextField(
+                  decoration: InputDecoration(
+                    labelText: "Send a message",
+                  ),
+                  onChanged: (value) {}),
+            ),
+            IconButton(
+              onPressed: () {},
+              icon: Icon(Icons.send),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -36,7 +47,9 @@ class ChatRoomPage extends ConsumerWidget {
             itemCount: chats.length,
             itemBuilder: (context, index) => ListTile(
               title: Text("msg : ${chats[index].msg}"),
-              subtitle: Text("from : ${chats[index].from}",),
+              subtitle: Text(
+                "from : ${chats[index].from}",
+              ),
             ),
             separatorBuilder: (context, index) => Divider(),
           );
@@ -63,28 +76,28 @@ class ChatRoomPage extends ConsumerWidget {
   void _onPressedSendButton(WidgetRef ref) {
     final chatController = ref.read(chatControllerProvider);
 
-      //서버로 보낼 데이터를 담아둔다.
-      //여기서 sendDate에 Timestamp.now()가 들어가는데 이는 디바이스의 시간을 나타내므로 나중에는 서버의 시간을 넣는 방법으로 변경하도록 하자.
-      ChatInsertReqDto dto = ChatInsertReqDto(from: "ssar", to: "cos", msg: chatController.text, sendDate: Timestamp.now());
+    //서버로 보낼 데이터를 담아둔다.
+    //여기서 sendDate에 Timestamp.now()가 들어가는데 이는 디바이스의 시간을 나타내므로 나중에는 서버의 시간을 넣는 방법으로 변경하도록 하자.
+    // ChatInsertReqDto dto = ChatInsertReqDto(from: "ssar", to: "cos", msg: chatController.text, sendDate: Timestamp.now());
 
-      chatController.insert(dto);
+    //chatController.insert(dto);
   }
 
   Widget getInputWidget() {
     return Container(
       height: 60,
       width: double.infinity,
-      decoration: BoxDecoration(boxShadow: const [
-        BoxShadow(color: Colors.black12, offset: Offset(0, -2), blurRadius: 3)
-      ], color: Theme.of(context).bottomAppBarColor),
+      // decoration: BoxDecoration(boxShadow: const [
+      //   BoxShadow(color: Colors.black12, offset: Offset(0, -2), blurRadius: 3)
+      // ], color: Theme.of(BuildContext).bottomAppBarColor),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 15,vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
         child: Row(
           mainAxisSize: MainAxisSize.max,
           children: [
             Expanded(
               child: TextField(
-                controller: controller,
+                //controller: controller,
                 decoration: InputDecoration(
                   labelStyle: TextStyle(fontSize: 15),
                   labelText: "내용을 입력하세요..",
@@ -105,15 +118,15 @@ class ChatRoomPage extends ConsumerWidget {
                 ),
               ),
             ),
-            SizedBox(width: 10,),
+            SizedBox(
+              width: 10,
+            ),
             RawMaterialButton(
-              onPressed: _onPressedSendButton, //전송버튼을 누를때 동작시킬 메소드
-              constraints: BoxConstraints(
-                  minWidth: 0,
-                  minHeight: 0
-              ),
+              onPressed: () {},
+              //전송버튼을 누를때 동작시킬 메소드
+              constraints: BoxConstraints(minWidth: 0, minHeight: 0),
               elevation: 2,
-              fillColor: Theme.of(context).colorScheme.primary,
+              //fillColor: Theme.of(context).colorScheme.primary,
               shape: CircleBorder(),
               child: Padding(
                 padding: EdgeInsets.all(10),
@@ -125,3 +138,4 @@ class ChatRoomPage extends ConsumerWidget {
       ),
     );
   }
+}
