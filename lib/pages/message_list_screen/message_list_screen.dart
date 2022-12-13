@@ -12,6 +12,8 @@ class MessageListScreen extends StatefulWidget {
 }
 
 class _MessageListScreenState extends State<MessageListScreen> {
+  TextEditingController controller = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,12 +35,15 @@ class _MessageListScreenState extends State<MessageListScreen> {
               children: [
                 Expanded(
                     child: ListView.builder(
+                        // 상위 위젯의 크기를 기준으로 잡는게 아닌 자식위젯의 크기를 기준으로 잡음
                         itemCount: messages.length,
                         itemBuilder: (context, index) {
                           return ListTile(
                             title: Text(messages[index].content),
+                            subtitle: Text(messages[index].sendDate.toDate().toLocal().toString().substring(5, 16)),
                           );
                         })),
+                getInputWidget()
               ],
             );
           }
@@ -68,5 +73,73 @@ class _MessageListScreenState extends State<MessageListScreen> {
       log('error)', error: ex.toString(), stackTrace: StackTrace.current);
       return Stream.error(ex.toString());
     }
+  }
+
+  void _onPressedSendButton() {
+    try {
+      //서버로 보낼 데이터를 모델클래스에 담아둔다.
+      //여기서 sendDate에 Timestamp.now()가 들어가는데 이는 디바이스의 시간을 나타내므로 나중에는 서버의 시간을 넣는 방법으로 변경하도록 하자.
+      MessageModel messageModel = MessageModel(content: controller.text, sendDate: Timestamp.now());
+
+      //Firestore 인스턴스 가져오기
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      //원하는 collection 주소에 새로운 document를 Map의 형태로 추가하는 모습.
+      firestore.collection('chatrooms/e1IX0v2WJ7f6k3W9iCUe/messages').add(messageModel.toMap());
+    } catch (ex) {
+      log('error)', error: ex.toString(), stackTrace: StackTrace.current);
+    }
+  }
+
+  Widget getInputWidget() {
+    return Container(
+      height: 60,
+      width: double.infinity,
+      decoration: BoxDecoration(boxShadow: const [BoxShadow(color: Colors.black12, offset: Offset(0, -2), blurRadius: 3)], color: Theme.of(context).bottomAppBarColor),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Expanded(
+              child: TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  labelStyle: TextStyle(fontSize: 15),
+                  labelText: "내용을 입력하세요..",
+                  fillColor: Colors.white,
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25.0),
+                    borderSide: BorderSide(
+                      color: Colors.blue,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25.0),
+                    borderSide: BorderSide(
+                      color: Colors.black26,
+                      width: 1.0,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            RawMaterialButton(
+              onPressed: _onPressedSendButton, //전송버튼을 누를때 동작시킬 메소드
+              constraints: BoxConstraints(minWidth: 0, minHeight: 0),
+              elevation: 2,
+              fillColor: Theme.of(context).colorScheme.primary,
+              shape: CircleBorder(),
+              child: Padding(
+                padding: EdgeInsets.all(10),
+                child: Icon(Icons.send),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 }
